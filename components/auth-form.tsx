@@ -18,10 +18,18 @@ export default function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
     setPending(true); setError(''); setUploadError('')
     const data = new FormData(event.currentTarget)
     const email = String(data.get('email')); const password = String(data.get('password')); const name = String(data.get('name') || '')
+    if (mode === 'sign-up') {
+      if (name.trim().length < 2 || password.length < 8 || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || data.get('privacyAccepted') !== 'on') {
+        setError('Enter a valid name, email, and password, then accept the Privacy Policy.'); setPending(false); return
+      }
+    }
     const result = mode === 'sign-in'
       ? await authClient.signIn.email({ email, password })
       : await authClient.signUp.email({ email, password, name })
     if (result.error) { setError('We could not complete that request. Check your details and try again.'); setPending(false); return }
+    if (mode === 'sign-up') {
+      await fetch('/api/consent', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ policyVersion: '2026-10-07' }) })
+    }
     if (mode === 'sign-up' && accountType === 'worker') {
       const idFile = data.get('idFile')
       let idPathname = ''
@@ -38,6 +46,6 @@ export default function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
 
   return <form className="auth-form" onSubmit={submit}>
     {mode === 'sign-up' && <><label>Full name<input name="name" required placeholder="Your name" /></label><div className="account-switch"><button type="button" className={accountType === 'customer' ? 'selected' : ''} onClick={() => setAccountType('customer')}>Customer account</button><button type="button" className={accountType === 'worker' ? 'selected' : ''} onClick={() => setAccountType('worker')}>Worker account</button></div>{accountType === 'worker' && <div className="worker-fields"><label>Trade<select name="trade"><option>Plumber</option><option>Electrician</option><option>Carpenter</option><option>Painter</option><option>Mason</option></select></label><label>Phone number<input name="phone" required placeholder="+1 868 ..." /></label><label>ID number<input name="idNumber" required placeholder="Government ID number" /></label><label>Certificate or license<input name="certificate" required placeholder="Certificate number or link" /></label><label>Government ID picture<input name="idFile" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" required /><small>JPG, PNG, WEBP, or PDF up to 8MB.</small></label><p className="form-note">Worker accounts are reviewed before they can accept jobs. Your ID and certificates are securely submitted for validation.</p></div>}</>}
-    <label>Email<input name="email" type="email" required placeholder="you@example.com" /></label><label>Password<input name="password" type="password" minLength={8} required placeholder="At least 8 characters" /></label>{(error || uploadError) && <p className="form-error">{error || uploadError}</p>}<button className="primary" disabled={pending}>{pending ? 'Please wait...' : mode === 'sign-in' ? 'Sign in' : 'Create account'}</button>
+    <label>Email<input name="email" type="email" required placeholder="you@example.com" /></label><label>Password<input name="password" type="password" minLength={8} required placeholder="At least 8 characters" /></label>{mode === 'sign-up' && <label className="policy-check"><input name="privacyAccepted" type="checkbox" required /> <span>I agree to the <a href="/privacy-policy" target="_blank" rel="noreferrer">Privacy Policy</a>.</span></label>}{(error || uploadError) && <p className="form-error">{error || uploadError}</p>}<button className="primary" disabled={pending}>{pending ? 'Please wait...' : mode === 'sign-in' ? 'Sign in' : 'Create account'}</button>
   </form>
 }

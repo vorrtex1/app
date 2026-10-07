@@ -27,7 +27,7 @@ export default function Page({ role: accountRole = 'customer' }: { role?: 'custo
           {i === 0 ? <LayoutDashboard /> : i === 1 ? <BriefcaseBusiness /> : i === 2 ? <CircleDollarSign /> : <Users />}<span>{item}</span>
         </button>)}
       </nav>
-      <div className="role"><small>Signed in as</small><strong>{worker ? 'Verified worker' : 'Customer'}</strong><span>{worker ? 'Worker workspace' : 'Customer workspace'}</span></div>
+      <div className="role"><small>Signed in as</small><strong>{worker ? 'Verified worker' : 'Customer'}</strong><span>{worker ? 'Worker workspace' : 'Customer workspace'}</span><a href="/privacy-policy" target="_blank" rel="noreferrer" className="profile-policy">Privacy Policy</a></div>
     </aside>
     <main className="main">
       <header className="topbar"><div><div className="crumb">Workspace / {activeNav}</div><h1>{worker ? 'Worker dashboard' : 'Customer dashboard'}</h1></div><div className="top-actions"><button className="iconbtn" aria-label="Notifications"><Bell /></button><button className="iconbtn" aria-label="Settings"><Settings /></button><div className="avatar">{worker ? 'MP' : 'AR'}</div></div></header>
