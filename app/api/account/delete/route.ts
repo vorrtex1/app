@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { eq } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { accountConsent, feedback, jobLocation, jobs, workerProfile } from '@/lib/db/schema'
@@ -16,5 +16,7 @@ export async function DELETE() {
   await db.delete(workerProfile).where(eq(workerProfile.userId, userId))
   await db.delete(accountConsent).where(eq(accountConsent.userId, userId))
   await auth.api.signOut({ headers: await headers() })
+  // Permanently remove the Better Auth user row so this email can never authenticate again.
+  await db.execute(sql`DELETE FROM "user" WHERE "id" = ${userId}`)
   return NextResponse.json({ ok: true, message: 'Your TradeRun app data has been deleted and your session has ended.' })
 }

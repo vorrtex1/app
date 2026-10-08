@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Bell, BriefcaseBusiness, CheckCircle2, ChevronRight, CircleDollarSign, Clock3, LayoutDashboard, MapPin, Settings, ShieldCheck, Star, TrendingUp, Users, Wrench } from 'lucide-react'
+import { Bell, BriefcaseBusiness, CheckCircle2, ChevronRight, CircleDollarSign, Clock3, LayoutDashboard, MapPin, Menu, Settings, ShieldCheck, Star, TrendingUp, Users, Wrench, X } from 'lucide-react'
 
 const jobs = [
   { initials: 'MP', name: 'Marcus Phillip', trade: 'Plumbing · 1.2 km away', status: 'On the way', amount: '$90.00', color: 'green' },
@@ -15,22 +15,25 @@ export default function Page({ role: accountRole = 'customer' }: { role?: 'custo
   const [activeNav, setActiveNav] = useState('Overview')
   const [online, setOnline] = useState(true)
   const [trade, setTrade] = useState('Plumber')
+  const [menuOpen, setMenuOpen] = useState(false)
 
   const worker = role === 'worker'
   const nav = worker ? ['Overview', 'Jobs', 'Earnings', 'Profile'] : ['Overview', 'Book a worker', 'Your bookings', 'Messages', 'Profile']
 
   return <div className="shell">
-    <aside className="sidebar">
+    {menuOpen && <button className="drawer-backdrop" aria-label="Close navigation" onClick={() => setMenuOpen(false)} />}
+    <aside className={`sidebar ${menuOpen ? 'open' : ''}`}>
+      <button className="drawer-close" aria-label="Close navigation" onClick={() => setMenuOpen(false)}><X /></button>
       <div className="logo">Trade<span>Run</span></div>
       <nav className="nav" aria-label="Primary navigation">
-        {nav.map((item, i) => <button key={item} className={activeNav === item ? 'active' : ''} onClick={() => setActiveNav(item)}>
+        {nav.map((item, i) => <button key={item} className={activeNav === item ? 'active' : ''} onClick={() => { setActiveNav(item); setMenuOpen(false) }}>
           {i === 0 ? <LayoutDashboard /> : i === 1 ? <BriefcaseBusiness /> : i === 2 ? <CircleDollarSign /> : <Users />}<span>{item}</span>
         </button>)}
       </nav>
       <div className="role"><small>Signed in as</small><strong>{worker ? 'Verified worker' : 'Customer'}</strong><span>{worker ? 'Worker workspace' : 'Customer workspace'}</span><a href="/privacy-policy" target="_blank" rel="noreferrer" className="profile-policy">Privacy Policy</a></div>
     </aside>
     <main className="main">
-      <header className="topbar"><div><div className="crumb">Workspace / {activeNav}</div><h1>{worker ? 'Worker dashboard' : 'Customer dashboard'}</h1></div><div className="top-actions"><button className="iconbtn" aria-label="Notifications"><Bell /></button><button className="iconbtn" aria-label="Settings"><Settings /></button><div className="avatar">{worker ? 'MP' : 'AR'}</div></div></header>
+      <header className="topbar"><div className="topbar-left"><button className="menu-trigger iconbtn" aria-label="Open navigation" onClick={() => setMenuOpen(true)}><Menu /></button><div><div className="crumb">Workspace / {activeNav}</div><h1>{worker ? 'Worker dashboard' : 'Customer dashboard'}</h1></div></div><div className="top-actions"><button className="iconbtn" aria-label="Notifications"><Bell /></button><button className="iconbtn" aria-label="Settings"><Settings /></button><div className="avatar">{worker ? 'MP' : 'AR'}</div></div></header>
       <div className="content">
         <div className="hero"><div><div className="eyebrow">{worker ? 'Tuesday, October 7' : 'Good morning, Alicia'}</div><h2>{worker ? 'Keep the work moving.' : 'What needs fixing?'}</h2><p>{worker ? 'Track your active jobs, earnings, and availability.' : 'Find a trusted professional nearby in a few simple steps.'}</p></div>{!worker && <button className="accent">Book a worker <ChevronRight size={15} /></button>}</div>
         {worker ? <WorkerView online={online} setOnline={setOnline} activeNav={activeNav} /> : <CustomerView activeNav={activeNav} trade={trade} setTrade={setTrade} />}
